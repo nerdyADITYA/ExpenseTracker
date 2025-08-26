@@ -1,10 +1,10 @@
 {
   "version": 2,
   "builds": [
-    { "src": "src/index.js", "use": "@vercel/node" }
+    { "src": "api/index.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/src/index.js" }
+    { "src": "/api/(.*)", "dest": "/api/index.js" }
   ],
   "env": {
     "NODE_ENV": "production"
@@ -13,8 +13,5 @@
     "api/index.js": {
       "maxDuration": 30
     }
-  },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  }
 }
