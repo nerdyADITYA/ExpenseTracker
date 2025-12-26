@@ -4,7 +4,7 @@ A full-stack web application for tracking personal income and expenses with beau
 
 ![ExpenseTracker](https://img.shields.io/badge/Status-Active-brightgreen)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white)
-![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=black)
+![React](https://img.shields.io/badge/React-19+-61DAFB?logo=react&logoColor=black)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4.4+-47A248?logo=mongodb&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
@@ -35,13 +35,16 @@ A full-stack web application for tracking personal income and expenses with beau
 - **Session Management**: Automatic token refresh and logout
 
 ### 📱 Modern UI/UX
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
-- **Dark Theme Support**: Eye-friendly interface
+- **Responsive Design**: Fully responsive layout optimized for mobile, tablet, and desktop
+- **Robust Mobile Form Layouts**: Vertical-stack layouts for forms ensuring usability on all screen sizes
 - **Interactive Components**: Smooth animations and transitions
-- **Tailwind CSS**: Modern, utility-first styling
+- **Tailwind CSS**: Modern, utility-first styling (v4)
 
 ### 🔄 Advanced Features
-- **File Upload**: Profile image upload with Multer
+- **Profile Image Handling**: 
+    - Supports image uploads
+    - Dynamic URL handling for production/development environments
+    - Optimized blob URL previews
 - **Data Visualization**: Charts powered by Recharts library
 - **Search & Filter**: Find transactions quickly
 - **Bulk Operations**: Manage multiple entries efficiently
@@ -62,7 +65,7 @@ A full-stack web application for tracking personal income and expenses with beau
 - **Deployment**: Vercel (Serverless functions)
 
 ### Frontend
-- **Framework**: React 18+ with Hooks
+- **Framework**: React 19+
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS 4+
 - **Routing**: React Router DOM 7+
@@ -107,7 +110,7 @@ cp .env.example .env
 # MONGO_URI=mongodb://localhost:27017/expensetracker
 # JWT_SECRET=your_super_secret_key
 # CLIENT_URL=http://localhost:5173
-# PORT=5000
+# PORT=8000
 ```
 
 ### 3. Frontend Setup
@@ -118,21 +121,24 @@ cd frontend/expense-tracker
 # Install dependencies
 npm install
 
-# Update API base URL in src/utils/apiPaths.js
-# export const BASE_URL = "http://localhost:5000"
+# Configure API path logic is handled in src/utils/apiPaths.js
 ```
 
 ### 4. Start the Application
+You need to run both the backend and frontend servers. It is recommended to open two separate terminals.
+
+**Terminal 1: Backend**
 ```bash
-# Start backend server (from backend directory)
-npm run dev  # Development mode
-# or
-npm start    # Production mode
-
-# Start frontend server (from frontend/expense-tracker directory)
+cd backend
 npm run dev
+# Server should start on port 8000 (or as configured)
+```
 
-# Access the application at http://localhost:5173
+**Terminal 2: Frontend**
+```bash
+cd frontend/expense-tracker
+npm run dev
+# Vite server should start (usually port 5173)
 ```
 
 ## 📁 Project Structure
@@ -140,65 +146,39 @@ npm run dev
 ```
 ExpenseTracker/
 ├── backend/
-│   ├── api/
-│   │   └── index.js                 # Vercel serverless entry point
-│   ├── config/
-│   │   └── db.js                    # MongoDB connection
-│   ├── controllers/
-│   │   ├── authController.js        # Authentication logic
-│   │   ├── dashboardController.js   # Dashboard data aggregation
-│   │   ├── ExpenseController.js     # Expense management
-│   │   └── incomeController.js      # Income management
-│   ├── middleware/
-│   │   ├── authMiddleware.js        # JWT verification
-│   │   └── uploadMiddleware.js      # File upload handling
-│   ├── models/
-│   │   ├── User.js                  # User schema
-│   │   ├── Income.js                # Income schema
-│   │   └── Expense.js               # Expense schema
-│   ├── routes/
-│   │   ├── authRoutes.js           # Authentication routes
-│   │   ├── dashboardRoutes.js      # Dashboard routes
-│   │   ├── expenseRoutes.js        # Expense routes
-│   │   └── incomeRoutes.js         # Income routes
-│   ├── uploads/                     # File upload directory
-│   ├── server.js                   # Express server setup
-│   ├── vercel.json                 # Vercel configuration
+│   ├── api/                     # Vercel serverless entry point
+│   ├── config/                  # Configuration files
+│   ├── controllers/             # Business logic
+│   ├── middleware/              # Express middleware
+│   ├── models/                  # Mongoose models
+│   ├── routes/                  # API routes
+│   ├── uploads/                 # File upload directory
+│   ├── server.js                # Server entry point
+│   ├── vercel.json              # Vercel backend config
 │   └── package.json
 │
 └── frontend/expense-tracker/
-    ├── public/
-    │   └── vite.svg
+    ├── public/                  # Static assets
     ├── src/
-    │   ├── assets/
-    │   │   └── images/
-    │   ├── components/
-    │   │   ├── Cards/               # Reusable card components
-    │   │   ├── Charts/              # Chart components
-    │   │   ├── Dashboard/           # Dashboard-specific components
-    │   │   ├── Expense/             # Expense management components
-    │   │   ├── Income/              # Income management components
-    │   │   ├── Inputs/              # Form input components
-    │   │   └── layouts/             # Layout components
-    │   ├── context/
-    │   │   └── UserContext.jsx      # Global user state
-    │   ├── hooks/
-    │   │   └── useUserAuth.jsx      # Authentication hook
-    │   ├── pages/
-    │   │   ├── Auth/                # Login/Register pages
-    │   │   └── Dashboard/           # Dashboard pages
-    │   ├── utils/
-    │   │   ├── apiPaths.js          # API endpoints
-    │   │   ├── axiosInstance.js     # HTTP client configuration
-    │   │   ├── data.js              # Static data
-    │   │   ├── helper.js            # Utility functions
-    │   │   └── uploadImage.js       # Image upload utilities
-    │   ├── App.jsx                  # Main App component
-    │   ├── main.jsx                 # React entry point
-    │   └── index.css                # Global styles
+    │   ├── assets/              # App images/icons
+    │   ├── components/          # Reusable components
+    │   │   ├── Cards/           # Card components
+    │   │   ├── Charts/          # Chart integrations
+    │   │   ├── Dashboard/       # Dashboard specific components
+    │   │   ├── Expense/         # Expense related components
+    │   │   ├── Income/          # Income related components
+    │   │   ├── Inputs/          # Custom input components
+    │   │   └── layouts/         # Layout wrappers (Auth, Dashboard)
+    │   ├── context/             # React Context (User state)
+    │   ├── hooks/               # Custom hooks
+    │   ├── pages/               # Application pages
+    │   ├── utils/               # Helper functions & API paths
+    │   ├── App.jsx              # Main App component
+    │   ├── main.jsx             # Entry point
+    │   └── index.css            # Global CSS & Tailwind imports
     ├── index.html
+    ├── vercel.json              # Vercel frontend config (rewrites)
     ├── package.json
-    ├── tailwind.config.js
     └── vite.config.js
 ```
 
@@ -213,7 +193,7 @@ MONGO_URI=mongodb://localhost:27017/expensetracker
 JWT_SECRET=your_super_secret_jwt_key_here
 
 # Server
-PORT=5000
+PORT=8000
 NODE_ENV=development
 
 # CORS
@@ -222,152 +202,53 @@ CLIENT_URL=http://localhost:5173
 
 ## 📊 API Documentation
 
-### Authentication Endpoints
+### Authentication
 ```http
-POST /api/v1/auth/register     # User registration
-POST /api/v1/auth/login        # User login
-GET  /api/v1/auth/getUser      # Get user profile
-POST /api/v1/auth/upload-image # Upload profile image
+POST /api/v1/auth/register     # Register new user
+POST /api/v1/auth/login        # Login user
+GET  /api/v1/auth/getUser      # Get user profile info
+PUT  /api/v1/auth/update-user  # Update user profile
+POST /api/v1/auth/upload-image # Upload profile picture
 ```
 
-### Income Endpoints
+### Dashboard
 ```http
-POST   /api/v1/income/add           # Add new income
-GET    /api/v1/income/get           # Get all income
-DELETE /api/v1/income/:id           # Delete income by ID
-GET    /api/v1/income/downloadexcel # Download Excel report
+GET /api/v1/dashboard          # Get aggregated dashboard data
 ```
 
-### Expense Endpoints
+### Income & Expenses
 ```http
-POST   /api/v1/expense/add           # Add new expense
-GET    /api/v1/expense/get           # Get all expenses
-DELETE /api/v1/expense/:id           # Delete expense by ID
-GET    /api/v1/expense/downloadexcel # Download Excel report
-```
-
-### Dashboard Endpoint
-```http
-GET /api/v1/dashboard  # Get comprehensive dashboard data
-```
-
-## 💾 Database Schema
-
-### User Model
-```javascript
-{
-  fullName: String (required),
-  email: String (required, unique),
-  password: String (required, hashed),
-  profileImageUrl: String,
-  timestamps: true
-}
-```
-
-### Income Model
-```javascript
-{
-  userId: ObjectId (required, ref: User),
-  icon: String,
-  source: String (required),
-  amount: Number (required),
-  date: Date (default: now),
-  timestamps: true
-}
-```
-
-### Expense Model
-```javascript
-{
-  userId: ObjectId (required, ref: User),
-  icon: String,
-  category: String (required),
-  amount: Number (required),
-  date: Date (default: now),
-  timestamps: true
-}
+POST   /api/v1/income/add      # Add income
+GET    /api/v1/income/get      # Get all income
+DELETE /api/v1/income/:id      # Delete income
+POST   /api/v1/expense/add     # Add expense
+GET    /api/v1/expense/get     # Get all expenses
+DELETE /api/v1/expense/:id     # Delete expense
 ```
 
 ## 🔐 Security Features
 
-- **JWT Authentication**: Secure token-based authentication
-- **Password Hashing**: bcryptjs for secure password storage
-- **Protected Routes**: Middleware-based route protection
-- **CORS Configuration**: Controlled cross-origin access
-- **Input Validation**: Server-side data validation
-- **File Upload Security**: Multer with file type restrictions
-- **Environment Variables**: Sensitive data protection
+- **JWT Authentication**: Secure token-based access control.
+- **Protected Routes**: Middleware ensures only authenticated users access data.
+- **CORS Configuration**: Restricts access to authorized clients.
+- **Passord Hashing**: Passwords are never stored in plain text.
+- **Environment Variables**: Sensitive configuration is kept out of code.
 
 ## 🚀 Deployment
 
-### Vercel (Backend)
+### Backend (Vercel)
+The backend is configured for Vercel deployment via `vercel.json` and `api/index.js`.
 ```bash
-# The backend is configured for Vercel serverless deployment
-# vercel.json is already configured
-
-# Deploy to Vercel
+cd backend
 vercel --prod
 ```
 
-### Netlify/Vercel (Frontend)
+### Frontend (Vercel/Netlify)
+The frontend application includes a `vercel.json` for handling client-side routing (rewrites).
 ```bash
-# Build the frontend
-npm run build
-
-# Deploy the dist folder to your preferred hosting service
+cd frontend/expense-tracker
+vercel --prod
 ```
-
-### Environment Configuration for Production
-- Set up MongoDB Atlas for production database
-- Configure environment variables in your hosting platform
-- Update CORS settings for production domains
-- Set up proper error logging and monitoring
-
-## 🎨 UI/UX Highlights
-
-- **Clean Design**: Minimalist interface focusing on usability
-- **Responsive Layout**: Mobile-first approach with Tailwind CSS
-- **Interactive Charts**: Beautiful data visualization with Recharts
-- **Smooth Animations**: Subtle transitions and loading states
-- **Color-coded Categories**: Visual distinction for different transaction types
-- **Toast Notifications**: User-friendly feedback system
-- **Loading States**: Smooth user experience during API calls
-
-## 📈 Performance Optimizations
-
-- **React Hooks**: Efficient state management and re-rendering
-- **Axios Interceptors**: Centralized request/response handling
-- **Lazy Loading**: Code splitting for better performance
-- **Vite Build Tool**: Fast development and optimized production builds
-- **MongoDB Indexing**: Optimized database queries
-- **Serverless Architecture**: Scalable backend deployment
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 🐛 Known Issues
-
-- Excel download feature requires proper CORS configuration in production
-- File upload size is limited to 5MB
-- Chart responsiveness needs improvement on very small screens
-
-## 🔮 Future Enhancements
-
-- [ ] Budget planning and tracking
-- [ ] Multiple currency support
-- [ ] Recurring transactions
-- [ ] Bank account integration
-- [ ] Advanced reporting and analytics
-- [ ] Mobile app development
-- [ ] Email notifications for budget limits
-- [ ] Data backup and restore
-- [ ] Multi-user family accounts
-- [ ] Investment tracking
 
 ## 📝 License
 
@@ -375,23 +256,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Developer
 
-**Aditya Kulkarni**
-- Email: adi05@gmail.com
-- Portfolio: [Your Portfolio URL]
-- LinkedIn: [Your LinkedIn Profile]
-- GitHub: [Your GitHub Profile]
-
-## 🙏 Acknowledgments
-
-- React community for excellent documentation
-- Tailwind CSS for the amazing utility-first framework
-- MongoDB for robust database solutions
-- Vercel for seamless deployment experience
-- Open source contributors for various packages used
-
----
+**Aditya Kadia**
+- Email: adikadia05@gmail.com
+- GitHub: [nerdyADITYA](https://github.com/nerdyADITYA)
 
 <div align="center">
   <p>Made with ❤️ for better financial management</p>
-  <p>⭐ Star this repository if you find it helpful!</p>
 </div>
