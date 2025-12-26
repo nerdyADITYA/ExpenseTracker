@@ -74,7 +74,7 @@ const Profile = () => {
                 <form onSubmit={handleUpdate} className='flex flex-col gap-6'>
                     <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
 
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                    <div className='grid grid-cols-1 gap-6'>
                         <Input
                             label="Full Name"
                             value={fullName}
@@ -89,7 +89,7 @@ const Profile = () => {
                             placeholder="Email Address"
                             type="text"
                         />
-                        <div className="col-span-2">
+                        <div>
                             <Input
                                 label="New Password"
                                 value={password}
