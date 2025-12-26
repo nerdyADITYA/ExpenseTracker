@@ -1,6 +1,6 @@
 import React from "react";
 
-import{
+import {
   BrowserRouter as Router,
   Routes,
   Route,
@@ -12,45 +12,47 @@ import SignUp from "./pages/Auth/SignUp";
 import Home from "./pages/Dashboard/Home";
 import Income from "./pages/Dashboard/Income";
 import Expense from "./pages/Dashboard/Expense";
+import Profile from "./pages/Dashboard/Profile";
 import UserProvider from "./context/UserContext";
-import {Toaster} from "react-hot-toast"
+import { Toaster } from "react-hot-toast"
 
 const App = () => {
-  return(
+  return (
     <UserProvider>
-    <div>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Root />} />
-          <Route path="/login" exact element={<Login />} />
-          <Route path="/signUp" exact element={<SignUp />} />
-          <Route path="/Dashboard" exact element={<Home />} />
-          <Route path="/income" exact element={<Income />} />
-          <Route path="/expense" exact element={<Expense />} />
-        </Routes>
-      </Router>
-    </div>
+      <div>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Root />} />
+            <Route path="/login" exact element={<Login />} />
+            <Route path="/signUp" exact element={<SignUp />} />
+            <Route path="/Dashboard" exact element={<Home />} />
+            <Route path="/income" exact element={<Income />} />
+            <Route path="/expense" exact element={<Expense />} />
+            <Route path="/profile" exact element={<Profile />} />
+          </Routes>
+        </Router>
+      </div>
 
-    <Toaster
-      toastOptions={{
-        className:"",
-        style:{
-          fontSize:"13px"
-        },
-      }}
-    />
+      <Toaster
+        toastOptions={{
+          className: "",
+          style: {
+            fontSize: "13px"
+          },
+        }}
+      />
     </UserProvider>
   )
 }
 
 export default App;
 
-const Root = () =>{
+const Root = () => {
   // Check if token exists in LocalStorage
   const isAuthenticated = !!localStorage.getItem("token")
 
   // Redirect to Dashboard if authenticated, otherwise to login 
-  return isAuthenticated? (
+  return isAuthenticated ? (
     <Navigate to="/dashboard" />
   ) : (
     <Navigate to="/login" />
