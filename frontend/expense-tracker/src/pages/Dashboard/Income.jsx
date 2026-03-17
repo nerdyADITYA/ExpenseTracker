@@ -21,6 +21,12 @@ const Income = () => {
     })
     const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false)
 
+    // Pagination and Filtering State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
     //Get All Income Details
     const fetchIncomeDetails = async() => {
         if(loading) return
@@ -28,12 +34,20 @@ const Income = () => {
         setLoading(true)
 
         try{
+            const params = new URLSearchParams({
+                page: currentPage,
+                limit: 10,
+                ...(startDate && { startDate }),
+                ...(endDate && { endDate })
+            });
+
             const response = await axiosInstance.get(
-                `${API_PATHS.INCOME.GET_ALL_INCOME}`
+                `${API_PATHS.INCOME.GET_ALL_INCOME}?${params.toString()}`
             )
 
             if(response.data){
-                setIncomeData(response.data)
+                setIncomeData(response.data.data)
+                setTotalPages(response.data.totalPages)
             }
 
         }
@@ -129,7 +143,7 @@ const Income = () => {
     useEffect(() => {
         fetchIncomeDetails()
         return () => {}
-    }, [])
+    }, [currentPage, startDate, endDate])
     
 
     return (
@@ -142,6 +156,38 @@ const Income = () => {
                         onAddIncome={()=> setOpenAddIncomeModal(true)}
                     />
                 </div>
+
+                <div className="card flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs text-slate-400 font-medium">Start Date</label>
+                            <input 
+                                type="date" 
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="bg-slate-700 text-white text-sm border border-slate-600 rounded-lg px-3 py-2 outline-none focus:border-purple-500"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs text-slate-400 font-medium">End Date</label>
+                            <input 
+                                type="date" 
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="bg-slate-700 text-white text-sm border border-slate-600 rounded-lg px-3 py-2 outline-none focus:border-purple-500"
+                            />
+                        </div>
+                    </div>
+                    {(startDate || endDate) && (
+                        <button 
+                            onClick={() => { setStartDate(""); setEndDate(""); }}
+                            className="text-xs text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                        >
+                            Clear Filters
+                        </button>
+                    )}
+                </div>
+
                 <IncomeList
                     transactions={incomeData}
                     onDelete={(id) =>{
@@ -149,6 +195,36 @@ const Income = () => {
                     }}
                     onDownload={handleDownloadIncomeDetails}
                 />
+
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-4 mt-4">
+                        <button 
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                                currentPage === 1 
+                                ? "bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed" 
+                                : "bg-slate-700 border-slate-600 text-white hover:bg-slate-600 active:scale-95"
+                            }`}
+                        >
+                            Previous
+                        </button>
+                        <span className="text-sm text-slate-300 font-medium">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button 
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                                currentPage === totalPages 
+                                ? "bg-slate-800 border-slate-700 text-slate-500 cursor-not-allowed" 
+                                : "bg-slate-700 border-slate-600 text-white hover:bg-slate-600 active:scale-95"
+                            }`}
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
             </div>
 
             <Modal

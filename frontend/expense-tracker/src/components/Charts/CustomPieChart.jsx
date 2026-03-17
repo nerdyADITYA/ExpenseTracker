@@ -43,7 +43,7 @@ const CustomPieChart = ({ data, label, totalAmount, colors, showTextAnchor }) =>
                             y="50%"
                             dy={-20} // CHANGED: Adjusted vertical offset (previously -25)
                             textAnchor="middle"
-                            fill="#666"
+                            fill="#cbd5e1"
                             fontSize="16px"
                             fontWeight="500"
                             dominantBaseline="middle" // ADDED: Critical for vertical centering
@@ -55,7 +55,7 @@ const CustomPieChart = ({ data, label, totalAmount, colors, showTextAnchor }) =>
                             y="50%"
                             dy={20} // CHANGED: Adjusted vertical offset (previously 8)
                             textAnchor="middle"
-                            fill="#333"
+                            fill="#ffffff"
                             fontSize="28px"
                             fontWeight="600"
                             dominantBaseline="middle" // ADDED: Critical for vertical centering

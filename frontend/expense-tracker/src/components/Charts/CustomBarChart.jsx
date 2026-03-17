@@ -22,10 +22,10 @@ const CustomBarChart = ({data}) => {
     const CustomTooltip = ({active,payload}) => {
         if(active && payload && payload.length){
             return (
-                <div className="bg-white shadow-md rounded-lg p-2 border border-gray-300">
-                    <p className="text-xs font-semibold text-purple-800 mb-1">{payload[0].payload.category}</p>
-                    <p className="text-sm text-gray-600">
-                        Amount: <span className="text-sm font-medium text-grayy-900">₹{payload[0].payload.amount}</ span>  
+                <div className="bg-slate-800 shadow-xl rounded-lg p-3 border border-slate-700">
+                    <p className="text-xs font-semibold text-purple-400 mb-1">{payload[0].payload.category}</p>
+                    <p className="text-sm text-slate-300">
+                        Amount: <span className="text-sm font-medium text-white">₹{payload[0].payload.amount}</ span>  
                     </p>
                 </div>
             )
@@ -34,15 +34,15 @@ const CustomBarChart = ({data}) => {
     }
 
     return (
-    <div className="bg-white mt-6">
+    <div className="bg-transparent mt-6">
         <ResponsiveContainer width="100%" height={300}>
             <BarChart data={data}>
                 <CartesianGrid stroke="none"/>
 
-                <XAxis dataKey="month" tick={{ fontSize:12, fill:"#555" }} stroke="none"/>
-                <YAxis tick={{ fontSize:12, fill:"#555" }} stroke="none"/>
+                <XAxis dataKey="month" tick={{ fontSize:12, fill:"#94a3b8" }} stroke="none"/>
+                <YAxis tick={{ fontSize:12, fill:"#94a3b8" }} stroke="none"/>
 
-                <Tooltip content={CustomTooltip}/>
+                <Tooltip content={CustomTooltip} cursor={{fill: 'rgba(255, 255, 255, 0.05)'}}/>
 
                 <Bar
                     dataKey="amount"

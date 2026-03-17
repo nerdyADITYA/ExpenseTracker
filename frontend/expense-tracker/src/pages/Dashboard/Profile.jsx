@@ -68,8 +68,8 @@ const Profile = () => {
 
     return (
         <DashboardLayout activeMenu="Profile">
-            <div className='p-6 bg-white rounded-lg shadow-md border border-gray-200/50 m-5'>
-                <h2 className='text-xl font-medium mb-6'>My Profile</h2>
+            <div className='p-6 bg-slate-800/50 backdrop-blur-md rounded-2xl shadow-xl border border-slate-700/50 m-5'>
+                <h2 className='text-xl font-medium mb-6 text-white'>My Profile</h2>
 
                 <form onSubmit={handleUpdate} className='flex flex-col gap-6'>
                     <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />

@@ -10,8 +10,8 @@ const Input = ({ value, onChange, label, placeholder, type, error }) => {
 
     return (
         <div className="mb-4">
-            <label className="text-[13px] text-slate-800 block mb-1">{label}</label>
-            <div className={`input-box border rounded-md px-3 py-2 flex items-center ${error ? 'border-red-500' : 'border-gray-300'}`}>
+            <label className="text-[13px] text-slate-400 block mb-1 font-medium">{label}</label>
+            <div className={`input-box border rounded-md px-3 py-2 flex items-center ${error ? 'border-red-500' : 'border-slate-700'}`}>
                 <input 
                     type={type === "password" ? showPassword ? "text" : "password" : type} 
                     placeholder={placeholder}

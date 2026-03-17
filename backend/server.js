@@ -2,7 +2,7 @@ require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
 const path = require("path")
-const connectDB = require("./api/config/db")
+const { connectDB } = require("./api/config/db")
 const authRoutes = require("./api/routes/authRoutes")
 const incomeRoutes = require("./api/routes/incomeRoutes")
 const expenseRoutes = require("./api/routes/expenseRoutes")
@@ -27,6 +27,10 @@ app.use("/api/v1/auth",authRoutes)
 app.use("/api/v1/income",incomeRoutes)
 app.use("/api/v1/expense",expenseRoutes)
 app.use("/api/v1/dashboard",dashboardRoutes)
+
+app.get("/api/v1/health", (req, res) => {
+    res.status(200).json({ status: "ok", message: "Server is awake" })
+})
 
 app.use("/uploads",express.static(path.join(__dirname,"api/uploads")))
 
