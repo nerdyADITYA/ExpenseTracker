@@ -28,6 +28,22 @@ const User = sequelize.define("User", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  gmailConnected: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  gmailAccessToken: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  gmailRefreshToken: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  gmailTokenExpiresAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
   hooks: {

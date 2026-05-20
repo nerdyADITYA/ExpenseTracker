@@ -14,6 +14,9 @@ import ExpenseTransactions from '../../components/Dashboard/ExpenseTransactions'
 import Last30DaysExpenses from '../../components/Dashboard/Last30DaysExpenses'
 import RecentIncomeWithChart from '../../components/Dashboard/RecentIncomeWithChart'
 import RecentIncome from '../../components/Dashboard/RecentIncome'
+import toast from 'react-hot-toast'
+import GmailConnectCard from '../../components/Dashboard/GmailConnectCard'
+import AutoDetectedTransactions from '../../components/Dashboard/AutoDetectedTransactions'
 
 const Home = () => {
 
@@ -23,6 +26,18 @@ const Home = () => {
 
     const[dashboardData,setDashboardData] = useState(null)
     const[loading,setLoading] = useState(false)
+    const [isGmailConnected, setIsGmailConnected] = useState(false)
+
+    const fetchGmailStatus = async () => {
+        try {
+            const response = await axiosInstance.get(API_PATHS.GMAIL.STATUS)
+            if (response.data) {
+                setIsGmailConnected(response.data.connected)
+            }
+        } catch (error) {
+            console.error("Error fetching Gmail status:", error)
+        }
+    }
 
     const fetchDashboardData = async () =>{
         if (loading) return
@@ -47,6 +62,19 @@ const Home = () => {
 
     useEffect(() => {
         fetchDashboardData()
+        fetchGmailStatus()
+
+        // Check for URL callback params
+        const params = new URLSearchParams(window.location.search)
+        const gmailConnect = params.get("gmail_connect")
+        if (gmailConnect === "success") {
+            toast.success("Gmail connected successfully! Auto-sync is active.")
+            setIsGmailConnected(true)
+            window.history.replaceState({}, document.title, window.location.pathname)
+        } else if (gmailConnect === "failed") {
+            toast.error("Failed to authorize Gmail account.")
+            window.history.replaceState({}, document.title, window.location.pathname)
+        }
     return () => {}
     }, [])
     
@@ -78,6 +106,12 @@ const Home = () => {
 
                 
             </div>
+
+            {!isGmailConnected ? (
+                <GmailConnectCard />
+            ) : (
+                <AutoDetectedTransactions onRefresh={fetchDashboardData} />
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                 <RecentTransactions

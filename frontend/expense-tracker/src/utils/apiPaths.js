@@ -26,4 +26,13 @@ export const API_PATHS = {
     IMAGE: {
         UPLOAD_IMAGE: "/api/v1/auth/upload-image"
     },
+    GMAIL: {
+        AUTH_URL: "/api/v1/gmail/auth-url",
+        STATUS: "/api/v1/gmail/status",
+        DISCONNECT: "/api/v1/gmail/disconnect",
+        PENDING: "/api/v1/gmail/pending",
+        SYNC: "/api/v1/gmail/sync",
+        APPROVE: (id) => `/api/v1/gmail/approve/${id}`,
+        DELETE: (id) => `/api/v1/gmail/pending/${id}`
+    }
 }

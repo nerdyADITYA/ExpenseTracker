@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
 
-const Expense = sequelize.define("Expense", {
+const PendingTransaction = sequelize.define("PendingTransaction", {
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -11,42 +11,45 @@ const Expense = sequelize.define("Expense", {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  icon: {
-    type: DataTypes.STRING,
-  },
-  category: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   amount: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
+  type: {
+    type: DataTypes.ENUM("income", "expense"),
+    allowNull: false,
+  },
+  merchant: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   date: {
     type: DataTypes.DATE,
+    allowNull: false,
     defaultValue: DataTypes.NOW,
-  },
-  entrySource: {
-    type: DataTypes.ENUM("manual", "email"),
-    defaultValue: "manual",
   },
   emailId: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
+    unique: true,
   },
   rawText: {
     type: DataTypes.TEXT,
     allowNull: true,
+  },
+  status: {
+    type: DataTypes.ENUM("pending", "approved", "deleted"),
+    defaultValue: "pending",
   },
 }, {
   timestamps: true,
 });
 
 // Alias for _id to maintain compatibility with frontend
-Expense.prototype.toJSON = function () {
+PendingTransaction.prototype.toJSON = function () {
   const values = Object.assign({}, this.get());
   values._id = values.id;
   return values;
 };
 
-module.exports = Expense;
+module.exports = PendingTransaction;

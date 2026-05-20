@@ -26,6 +26,18 @@ const Income = sequelize.define("Income", {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
   },
+  entrySource: {
+    type: DataTypes.ENUM("manual", "email"),
+    defaultValue: "manual",
+  },
+  emailId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  rawText: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
 });
