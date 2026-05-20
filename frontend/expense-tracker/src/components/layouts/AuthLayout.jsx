@@ -1,14 +1,23 @@
 import React from 'react'
 import image from '../../assets/images/image.png'
+import { Link } from 'react-router-dom'
 import { LuTrendingUpDown } from 'react-icons/lu'
 
 const AuthLayout = ({ children }) => {
     return <div className="flex bg-slate-900 min-h-screen">
-        <div className="w-screen h-screen lg:w-[60vw] px-4 lg:px-12 pt-8 pb-12 flex flex-col">
-            <h2 className="text-lg font-medium text-white mb-6">Expense Tracker</h2>
-            <div className="flex-1 flex flex-col justify-center">
-                {children}
+        <div className="w-screen h-screen lg:w-[60vw] px-4 lg:px-12 pt-8 pb-6 flex flex-col justify-between">
+            <div>
+                <h2 className="text-lg font-medium text-white mb-6">Expense Tracker</h2>
+                <div>
+                    {children}
+                </div>
             </div>
+            
+            <footer className="mt-6 text-center lg:text-left text-slate-500 text-xs flex gap-4 justify-center lg:justify-start">
+                <Link to="/privacy-policy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
+                <span>•</span>
+                <Link to="/terms-of-service" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
+            </footer>
         </div>
 
         <div className="hidden lg:block w-[40vw] h-screen bg-slate-800 bg-auth-bg-image bg-cover bg-no-repeat bg-center overflow-hidden p-8 relative border-l border-slate-700">
