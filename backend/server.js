@@ -15,15 +15,13 @@ const bankAccountRoutes = require("./api/routes/bankAccountRoutes")
 const app = express()
 
 // Middleware to handle CORS
-const allowedOrigins = process.env.CLIENT_URL 
-    ? process.env.CLIENT_URL.split(",").map(o => o.trim()) 
-    : "*";
-
 app.use(
     cors({
-        origin: allowedOrigins,
-        methods: ["GET","POST","PUT","DELETE"],
-        allowedHeaders:["Content-Type","Authorization","x-bank-account-id"]
+        origin: (origin, callback) => {
+            // Dynamically allow any origin (e.g. localhost, 127.0.0.1, or prod domains)
+            callback(null, true);
+        },
+        methods: ["GET", "POST", "PUT", "DELETE"]
     })
 )
 

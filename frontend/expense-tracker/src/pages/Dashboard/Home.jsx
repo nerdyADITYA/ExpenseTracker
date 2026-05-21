@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/layouts/DashboardLayout'
 import { useUserAuth } from '../../hooks/useUserAuth'
@@ -29,6 +29,7 @@ const Home = () => {
     const[dashboardData,setDashboardData] = useState(null)
     const[loading,setLoading] = useState(false)
     const [isGmailConnected, setIsGmailConnected] = useState(false)
+    const latestBankIdRef = useRef(null)
 
     const fetchGmailStatus = async () => {
         try {
@@ -41,29 +42,37 @@ const Home = () => {
         }
     }
 
-    const fetchDashboardData = async () =>{
-        if (loading) return
+    const fetchDashboardData = async (bankId) =>{
+        const targetBankId = bankId || activeBankAccount?.id
+        if (!targetBankId) return;
 
+        latestBankIdRef.current = targetBankId
+        const currentRequestBankId = targetBankId
         setLoading(true)
 
         try{
+            const headers = { "x-bank-account-id": targetBankId }
             const response = await axiosInstance.get(
-                `${API_PATHS.DASHBOARD.GET_DATA}`
+                `${API_PATHS.DASHBOARD.GET_DATA}`,
+                { headers }
             )
-            if(response.data){
+            if(latestBankIdRef.current === currentRequestBankId && response.data){
                 setDashboardData(response.data)
             }
         }
         catch(error){
-            console.log("Something went wrong. Please Try again",error)
+            console.error("[Home] Dashboard fetch failed:", error)
+            toast.error("Dashboard fetch failed: " + (error.response?.data?.message || error.message));
         }
         finally{
-            setLoading(false)
+            if (latestBankIdRef.current === currentRequestBankId) {
+                setLoading(false)
+            }
         }
     }
 
     useEffect(() => {
-        fetchDashboardData()
+        fetchDashboardData(activeBankAccount?.id)
         fetchGmailStatus()
 
         // Check for URL callback params

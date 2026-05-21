@@ -38,6 +38,10 @@ const Income = sequelize.define("Income", {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  bankAccountId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
 });

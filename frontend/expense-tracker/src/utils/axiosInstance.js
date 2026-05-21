@@ -15,11 +15,25 @@ axiosInstance.interceptors.request.use(
     (config) => {
         const accessToken = localStorage.getItem("token") || sessionStorage.getItem("token");
         if(accessToken){
-            config.headers.Authorization = `Bearer ${accessToken}`
+            if (config.headers.set) {
+                config.headers.set("Authorization", `Bearer ${accessToken}`);
+            } else {
+                config.headers.Authorization = `Bearer ${accessToken}`;
+            }
         }
         const activeBankAccountId = localStorage.getItem("activeBankAccountId");
         if (activeBankAccountId) {
-            config.headers["x-bank-account-id"] = activeBankAccountId;
+            const hasHeader = config.headers.has 
+                ? (config.headers.has("x-bank-account-id") || config.headers.has("X-Bank-Account-Id"))
+                : (config.headers["x-bank-account-id"] || config.headers["X-Bank-Account-Id"]);
+            
+            if (!hasHeader) {
+                if (config.headers.set) {
+                    config.headers.set("x-bank-account-id", activeBankAccountId);
+                } else {
+                    config.headers["x-bank-account-id"] = activeBankAccountId;
+                }
+            }
         }
         return config
     },

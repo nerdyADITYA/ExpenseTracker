@@ -38,6 +38,10 @@ const Expense = sequelize.define("Expense", {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  bankAccountId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
 });

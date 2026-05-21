@@ -1,7 +1,7 @@
 import React from 'react'
 import DashboardLayout from '../../components/layouts/DashboardLayout'
 import IncomeOverview from '../../components/Income/IncomeOverview'
-import { useState,useEffect,useContext } from 'react'
+import { useState,useEffect,useContext,useRef } from 'react'
 import { UserContext } from '../../context/UserContext'
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from '../../utils/apiPaths'
@@ -29,9 +29,15 @@ const Income = () => {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
+    const latestBankIdRef = useRef(null)
+
     //Get All Income Details
-    const fetchIncomeDetails = async() => {
-        if(loading) return
+    const fetchIncomeDetails = async(bankId) => {
+        const targetBankId = bankId || activeBankAccount?.id
+        if (!targetBankId) return;
+
+        latestBankIdRef.current = targetBankId
+        const currentRequestBankId = targetBankId
 
         setLoading(true)
 
@@ -43,23 +49,25 @@ const Income = () => {
                 ...(endDate && { endDate })
             });
 
+            const headers = { "x-bank-account-id": targetBankId }
             const response = await axiosInstance.get(
-                `${API_PATHS.INCOME.GET_ALL_INCOME}?${params.toString()}`
+                `${API_PATHS.INCOME.GET_ALL_INCOME}?${params.toString()}`,
+                { headers }
             )
 
-            if(response.data){
+            if(latestBankIdRef.current === currentRequestBankId && response.data){
                 setIncomeData(response.data.data)
                 setTotalPages(response.data.totalPages)
             }
-
         }
         catch(err){
             console.log("Something went wrong. Please try again", err)
         }
         finally{
-            setLoading(false)
+            if (latestBankIdRef.current === currentRequestBankId) {
+                setLoading(false)
+            }
         }
-
     }
 
     // Handle Add Income
@@ -143,7 +151,7 @@ const Income = () => {
 
 
     useEffect(() => {
-        fetchIncomeDetails()
+        fetchIncomeDetails(activeBankAccount?.id)
         return () => {}
     }, [currentPage, startDate, endDate, activeBankAccount?.id])
     

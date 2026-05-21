@@ -1,4 +1,4 @@
-import React, {useState,useEffect,useContext} from 'react'
+import React, {useState,useEffect,useContext,useRef} from 'react'
 import { UserContext } from '../../context/UserContext'
 import { useUserAuth } from '../../hooks/useUserAuth'
 import axiosInstance from '../../utils/axiosInstance'
@@ -30,9 +30,15 @@ const Expense = () => {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
+    const latestBankIdRef = useRef(null)
+
     //Get All Expense Details
-    const fetchExpenseDetails = async() => {
-        if(loading) return
+    const fetchExpenseDetails = async(bankId) => {
+        const targetBankId = bankId || activeBankAccount?.id
+        if (!targetBankId) return;
+
+        latestBankIdRef.current = targetBankId
+        const currentRequestBankId = targetBankId
 
         setLoading(true)
 
@@ -44,23 +50,25 @@ const Expense = () => {
                 ...(endDate && { endDate })
             });
 
+            const headers = { "x-bank-account-id": targetBankId }
             const response = await axiosInstance.get(
-                `${API_PATHS.EXPENSE.GET_ALL_EXPENSE}?${params.toString()}`
+                `${API_PATHS.EXPENSE.GET_ALL_EXPENSE}?${params.toString()}`,
+                { headers }
             )
 
-            if(response.data){
+            if(latestBankIdRef.current === currentRequestBankId && response.data){
                 setExpenseData(response.data.data)
                 setTotalPages(response.data.totalPages)
             }
-
         }
         catch(err){
             console.log("Something went wrong. Please try again", err)
         }
         finally{
-            setLoading(false)
+            if (latestBankIdRef.current === currentRequestBankId) {
+                setLoading(false)
+            }
         }
-
     }
 
     // Handle Add Expense
@@ -144,7 +152,7 @@ const Expense = () => {
 
 
     useEffect(() => {
-        fetchExpenseDetails()
+        fetchExpenseDetails(activeBankAccount?.id)
         return () => {}
     }, [currentPage, startDate, endDate, activeBankAccount?.id])
 

@@ -1,5 +1,6 @@
 const Income = require("../models/Income")
 const Expense = require("../models/Expense")
+const BankAccount = require("../models/BankAccount")
 const { Op, fn, col } = require("sequelize")
 
 //Dashboard Data
@@ -11,6 +12,31 @@ exports.getDashboardData = async (req, res) => {
         let whereClause = { userId };
         if (bankAccountId) {
             whereClause.bankAccountId = bankAccountId;
+        }
+
+        // Fetch initial balance
+        let initialBalance = 0;
+        console.log("[Dashboard] Request from User ID:", userId);
+        console.log("[Dashboard] x-bank-account-id header:", bankAccountId);
+        
+        if (bankAccountId) {
+            const bankAccount = await BankAccount.findOne({ where: { id: bankAccountId, userId } });
+            initialBalance = bankAccount ? parseFloat(bankAccount.initialBalance || 0) : 0;
+            console.log("[Dashboard] Found specific bank account:", bankAccount ? bankAccount.id : "null", "with initialBalance:", initialBalance);
+        } else {
+            const allAccounts = await BankAccount.findAll({ where: { userId } });
+            initialBalance = allAccounts.reduce((sum, acc) => sum + parseFloat(acc.initialBalance || 0), 0);
+            console.log("[Dashboard] No specific account header. Summed all accounts initialBalance:", initialBalance);
+        }
+
+        // Append log to api_debug.log
+        try {
+            const fs = require("fs");
+            const path = require("path");
+            const logMsg = `${new Date().toISOString()} - User: ${userId}, Header Bank ID: ${bankAccountId}, Found Initial Balance: ${initialBalance}\n`;
+            fs.appendFileSync(path.join(__dirname, "../../api_debug.log"), logMsg);
+        } catch (e) {
+            console.error("Log write failed", e);
         }
 
         //Fetch total income and expense
@@ -72,7 +98,7 @@ exports.getDashboardData = async (req, res) => {
 
         //Final response
         res.json({
-            totalBalance: totalIncome - totalExpense,
+            totalBalance: initialBalance + totalIncome - totalExpense,
             totalIncome: totalIncome,
             totalExpense: totalExpense,
             last30DaysExpenses: {

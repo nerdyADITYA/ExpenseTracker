@@ -39,6 +39,33 @@ const runMigrations = async (queryInterface) => {
     await sequelize.query("ALTER TABLE Incomes ADD COLUMN IF NOT EXISTS rawText TEXT DEFAULT NULL;");
     await sequelize.query("ALTER TABLE Incomes ADD COLUMN IF NOT EXISTS bankAccountId INT DEFAULT NULL;");
 
+    // Backfill bankAccountId for existing expenses/incomes that are NULL
+    try {
+      await sequelize.query(`
+        UPDATE Expenses e
+        INNER JOIN (
+          SELECT userId, MIN(id) as first_bank_id
+          FROM BankAccounts
+          GROUP BY userId
+        ) b ON e.userId = b.userId
+        SET e.bankAccountId = b.first_bank_id
+        WHERE e.bankAccountId IS NULL;
+      `);
+      await sequelize.query(`
+        UPDATE Incomes i
+        INNER JOIN (
+          SELECT userId, MIN(id) as first_bank_id
+          FROM BankAccounts
+          GROUP BY userId
+        ) b ON i.userId = b.userId
+        SET i.bankAccountId = b.first_bank_id
+        WHERE i.bankAccountId IS NULL;
+      `);
+      console.log("Backfilled missing bankAccountId for orphan transaction records.");
+    } catch (backfillError) {
+      console.warn("Backfill info (can be ignored if BankAccounts table is empty):", backfillError.message);
+    }
+
     console.log("Schema migrations completed successfully.");
   } catch (migrationError) {
     console.error("Migration error (safe to ignore if columns already exist):", migrationError);
