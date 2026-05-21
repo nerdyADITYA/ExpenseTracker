@@ -1,4 +1,5 @@
 require("dotenv").config()
+// Triggering nodemon reload for .env update
 const express = require("express")
 const cors = require("cors")
 const path = require("path")
@@ -9,15 +10,20 @@ const incomeRoutes = require("./api/routes/incomeRoutes")
 const expenseRoutes = require("./api/routes/expenseRoutes")
 const dashboardRoutes = require("./api/routes/dashboardRoutes")
 const gmailRoutes = require("./api/routes/gmailRoutes")
+const bankAccountRoutes = require("./api/routes/bankAccountRoutes")
 
 const app = express()
 
 // Middleware to handle CORS
+const allowedOrigins = process.env.CLIENT_URL 
+    ? process.env.CLIENT_URL.split(",").map(o => o.trim()) 
+    : "*";
+
 app.use(
     cors({
-        origin: process.env.CLIENT_URL || "*",
+        origin: allowedOrigins,
         methods: ["GET","POST","PUT","DELETE"],
-        allowedHeaders:["Content-Type","Authorization"]
+        allowedHeaders:["Content-Type","Authorization","x-bank-account-id"]
     })
 )
 
@@ -31,6 +37,7 @@ app.use("/api/v1/income",incomeRoutes)
 app.use("/api/v1/expense",expenseRoutes)
 app.use("/api/v1/dashboard",dashboardRoutes)
 app.use("/api/v1/gmail",gmailRoutes)
+app.use("/api/v1/bank-accounts",bankAccountRoutes)
 
 app.get("/api/v1/health", (req, res) => {
     res.status(200).json({ status: "ok", message: "Server is awake" })

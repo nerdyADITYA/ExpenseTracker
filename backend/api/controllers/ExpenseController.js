@@ -4,6 +4,7 @@ const Expense = require("../models/Expense")
 //Add Expense source
 exports.addExpense = async(req,res) => {
     const userId = req.user.id
+    const bankAccountId = req.headers["x-bank-account-id"]
 
     try{
         const {icon,category,amount,date} = req.body
@@ -12,8 +13,11 @@ exports.addExpense = async(req,res) => {
         if (!category || !amount || !date){
             return res.status(400).json({message:"All fields are required !!!"})
         }
+        if (!bankAccountId) {
+            return res.status(400).json({message:"Bank account selection is required !!!"})
+        }
         const newExpense = await Expense.create({
-            userId, icon, category, amount, date: new Date(date)
+            userId, icon, category, amount, date: new Date(date), bankAccountId
         })
 
         res.status(200).json(newExpense)
@@ -29,12 +33,16 @@ const { Op } = require("sequelize");
 
 exports.getAllExpense = async(req,res) => {
     const userId = req.user.id
+    const bankAccountId = req.headers["x-bank-account-id"]
     const { page = 1, limit = 10, startDate, endDate } = req.query;
 
     const offset = (page - 1) * limit;
 
     try{
         let whereClause = { userId };
+        if (bankAccountId) {
+            whereClause.bankAccountId = bankAccountId;
+        }
 
         if (startDate && endDate) {
             whereClause.date = {
@@ -83,9 +91,14 @@ exports.deleteExpense = async(req,res) => {
 //Download Excel
 exports.downloadExpenseExcel = async(req,res) => {
     const userId = req.user.id
+    const bankAccountId = req.headers["x-bank-account-id"]
     try{
+        let whereClause = { userId }
+        if (bankAccountId) {
+            whereClause.bankAccountId = bankAccountId
+        }
         const expense = await Expense.findAll({
-            where: { userId },
+            where: whereClause,
             order: [['date', 'DESC']]
         })
 

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { LuUser, LuUpload, LuTrash } from "react-icons/lu"
-import { BASE_URL } from '../../utils/apiPaths'
+import { getProfileImageUrl } from '../../utils/helper'
 
 const ProfilePhotoSelector = ({ image, setImage }) => {
 
@@ -59,7 +59,13 @@ const ProfilePhotoSelector = ({ image, setImage }) => {
             </div>
         ) : (
             <div className="relative">
-                <img src={previewUrl && !previewUrl.startsWith('blob:') && previewUrl.includes('http') ? `${BASE_URL}/uploads/${previewUrl.split('/').pop()}` : previewUrl} alt="profile photo" className="w-20 h-20 rounded-full object-cover" />
+                {previewUrl ? (
+                    <img src={getProfileImageUrl(previewUrl)} alt="profile photo" className="w-20 h-20 rounded-full object-cover" />
+                ) : (
+                    <div className="w-20 h-20 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center">
+                        <LuUser className="text-4xl text-purple-400" />
+                    </div>
+                )}
                 <button type="button" className="w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full absolute -bottom-1 -right-1" onClick={handleRemoveImage}><LuTrash /></button>
             </div>
         )}

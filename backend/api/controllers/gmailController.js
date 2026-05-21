@@ -20,6 +20,19 @@ exports.getGmailAuthUrl = (req, res) => {
   }
 };
 
+const getClientRedirectUrl = (req) => {
+  const clientUrls = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",").map(url => url.trim()) : [];
+  if (clientUrls.length === 0) return "";
+  if (clientUrls.length === 1) return clientUrls[0];
+  
+  const host = req.get("host") || "";
+  if (host.includes("localhost") || host.includes("127.0.0.1")) {
+    const localUrl = clientUrls.find(url => url.includes("localhost") || url.includes("127.0.0.1"));
+    if (localUrl) return localUrl;
+  }
+  return clientUrls[0];
+};
+
 /**
  * OAuth2 redirect callback target
  */
@@ -31,6 +44,7 @@ exports.gmailCallback = async (req, res) => {
   }
 
   const userId = parseInt(userIdStr);
+  const clientRedirectUrl = getClientRedirectUrl(req);
 
   try {
     const user = await User.findByPk(userId);
@@ -45,7 +59,7 @@ exports.gmailCallback = async (req, res) => {
       // Sometimes refresh token is omitted if consent was already given in the past.
       // Re-trigger auth url but with prompt=consent if refresh_token is missing.
       return res.redirect(
-        `${process.env.CLIENT_URL}/dashboard?gmail_connect=error&reason=consent_missing`
+        `${clientRedirectUrl}/dashboard?gmail_connect=error&reason=consent_missing`
       );
     }
 
@@ -70,12 +84,13 @@ exports.gmailCallback = async (req, res) => {
     }
 
     // Redirect user back to frontend dashboard
-    res.redirect(`${process.env.CLIENT_URL}/dashboard?gmail_connect=success`);
+    res.redirect(`${clientRedirectUrl}/dashboard?gmail_connect=success`);
   } catch (error) {
     console.error("Error in Gmail OAuth callback:", error);
-    res.redirect(`${process.env.CLIENT_URL}/dashboard?gmail_connect=failed`);
+    res.redirect(`${clientRedirectUrl}/dashboard?gmail_connect=failed`);
   }
 };
+
 
 /**
  * Disconnects Gmail account and purges pending staging items
@@ -163,6 +178,7 @@ exports.approveTransaction = async (req, res) => {
   const userId = req.user.id;
   const pendingId = req.params.id;
   const { amount, type, categoryOrSource, date, merchant } = req.body;
+  const bankAccountId = req.headers["x-bank-account-id"];
 
   try {
     const pendingTx = await PendingTransaction.findOne({
@@ -171,6 +187,10 @@ exports.approveTransaction = async (req, res) => {
 
     if (!pendingTx) {
       return res.status(404).json({ message: "Pending transaction not found" });
+    }
+
+    if (!bankAccountId) {
+      return res.status(400).json({ message: "Bank account selection is required !!!" });
     }
 
     // Capture values, allowing overrides from the user's edit inputs
@@ -189,6 +209,7 @@ exports.approveTransaction = async (req, res) => {
         entrySource: "email",
         emailId: pendingTx.emailId,
         rawText: pendingTx.rawText,
+        bankAccountId,
       });
     } else {
       await Income.create({
@@ -200,6 +221,7 @@ exports.approveTransaction = async (req, res) => {
         entrySource: "email",
         emailId: pendingTx.emailId,
         rawText: pendingTx.rawText,
+        bankAccountId,
       });
     }
 

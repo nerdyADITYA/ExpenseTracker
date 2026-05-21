@@ -13,9 +13,13 @@ const axiosInstance = axios.create({
 // Request Interceptor
 axiosInstance.interceptors.request.use(
     (config) => {
-        const accessToken = localStorage.getItem("token")
+        const accessToken = localStorage.getItem("token") || sessionStorage.getItem("token");
         if(accessToken){
             config.headers.Authorization = `Bearer ${accessToken}`
+        }
+        const activeBankAccountId = localStorage.getItem("activeBankAccountId");
+        if (activeBankAccountId) {
+            config.headers["x-bank-account-id"] = activeBankAccountId;
         }
         return config
     },

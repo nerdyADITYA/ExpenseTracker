@@ -6,17 +6,23 @@ const { Op, fn, col } = require("sequelize")
 exports.getDashboardData = async (req, res) => {
     try {
         const userId = req.user.id
+        const bankAccountId = req.headers["x-bank-account-id"]
+
+        let whereClause = { userId };
+        if (bankAccountId) {
+            whereClause.bankAccountId = bankAccountId;
+        }
 
         //Fetch total income and expense
         const totalIncomeArr = await Income.findAll({
-            where: { userId },
+            where: whereClause,
             attributes: [[fn('SUM', col('amount')), 'total']],
             raw: true
         })
         const totalIncome = parseFloat(totalIncomeArr[0]?.total || 0)
 
         const totalExpenseArr = await Expense.findAll({
-            where: { userId },
+            where: whereClause,
             attributes: [[fn('SUM', col('amount')), 'total']],
             raw: true
         })
@@ -25,7 +31,7 @@ exports.getDashboardData = async (req, res) => {
         //Get income transcations in the last 60 days
         const last60DaysIncomeTransactions = await Income.findAll({
             where: {
-                userId,
+                ...whereClause,
                 date: { [Op.gte]: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) },
             },
             order: [['date', 'DESC']]
@@ -37,7 +43,7 @@ exports.getDashboardData = async (req, res) => {
         //Get expense Transactions in the last 30 days
         const last30DaysExpenseTransactions = await Expense.findAll({
             where: {
-                userId,
+                ...whereClause,
                 date: { [Op.gte]: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
             },
             order: [['date', 'DESC']]
@@ -48,13 +54,13 @@ exports.getDashboardData = async (req, res) => {
 
         //fetch last 5 transactions(income+expense)
         const recentIncomes = await Income.findAll({
-            where: { userId },
+            where: whereClause,
             order: [['date', 'DESC']],
             limit: 5
         })
 
         const recentExpenses = await Expense.findAll({
-            where: { userId },
+            where: whereClause,
             order: [['date', 'DESC']],
             limit: 5
         })

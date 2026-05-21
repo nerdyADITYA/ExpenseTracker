@@ -1,4 +1,5 @@
-import React, {useState,useEffect} from 'react'
+import React, {useState,useEffect,useContext} from 'react'
+import { UserContext } from '../../context/UserContext'
 import { useUserAuth } from '../../hooks/useUserAuth'
 import axiosInstance from '../../utils/axiosInstance'
 import DashboardLayout from '../../components/layouts/DashboardLayout'
@@ -13,6 +14,7 @@ import DeleteAlert from '../../components/DeleteAlert'
 
 const Expense = () => {
     useUserAuth()
+    const { activeBankAccount } = useContext(UserContext)
 
     const [expenseData,setExpenseData] = useState([])
     const [loading,setLoading] = useState(false)
@@ -144,11 +146,11 @@ const Expense = () => {
     useEffect(() => {
         fetchExpenseDetails()
         return () => {}
-    }, [currentPage, startDate, endDate])
+    }, [currentPage, startDate, endDate, activeBankAccount?.id])
 
     return (
     <DashboardLayout activeMenu = "Expense">
-        <div className="my-5 mx-auto">
+        <div className="my-5 w-full mx-auto">
             <div className="grid grid-cols-1 gap-6">
                 <div className="">
                     <ExpenseOverview

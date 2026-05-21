@@ -4,6 +4,7 @@ import {
     LuWalletMinimal,
     LuLogOut,
     LuUser,
+    LuCreditCard,
 } from "react-icons/lu"
 
 export const SIDE_MENU_DATA = [
@@ -30,6 +31,12 @@ export const SIDE_MENU_DATA = [
         label: "Profile",
         icon: LuUser,
         path: "/profile"
+    },
+    {
+        id: "05",
+        label: "Bank Accounts",
+        icon: LuCreditCard,
+        path: "/banks"
     },
     {
         id: "06",

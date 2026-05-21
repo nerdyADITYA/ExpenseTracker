@@ -1,7 +1,8 @@
 import React from 'react'
 import DashboardLayout from '../../components/layouts/DashboardLayout'
 import IncomeOverview from '../../components/Income/IncomeOverview'
-import { useState,useEffect } from 'react'
+import { useState,useEffect,useContext } from 'react'
+import { UserContext } from '../../context/UserContext'
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from '../../utils/apiPaths'
 import Modal from '../../components/Modal'
@@ -13,6 +14,7 @@ import { useUserAuth } from '../../hooks/useUserAuth'
 
 const Income = () => {
     useUserAuth()
+    const { activeBankAccount } = useContext(UserContext)
     const [incomeData,setIncomeData] = useState([])
     const [loading,setLoading] = useState(false)
     const [openDeleteAlert,setOpenDeleteAlert] = useState({
@@ -143,12 +145,12 @@ const Income = () => {
     useEffect(() => {
         fetchIncomeDetails()
         return () => {}
-    }, [currentPage, startDate, endDate])
+    }, [currentPage, startDate, endDate, activeBankAccount?.id])
     
 
     return (
     <DashboardLayout activeMenu = "Income">
-        <div className="my-5 mx-auto">
+        <div className="my-5 w-full mx-auto">
             <div className="grid grid-cols-1 gap-6">
                 <div className=''>
                     <IncomeOverview

@@ -11,6 +11,7 @@ import { UserContext } from "../../context/UserContext";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [keepLoggedIn, setKeepLoggedIn] = useState(false);
     const [error, setError] = useState(null);
     const [emailError, setEmailError] = useState("");
     const [passwordError, setPasswordError] = useState("");
@@ -55,7 +56,11 @@ const Login = () => {
             const {token,user} = response.data 
 
             if(token){
-                localStorage.setItem("token",token)
+                if (keepLoggedIn) {
+                    localStorage.setItem("token", token)
+                } else {
+                    sessionStorage.setItem("token", token)
+                }
                 updateUser(user)
                 navigate("/dashboard")
             }
@@ -103,6 +108,19 @@ const Login = () => {
                         type="password"
                         error={passwordError}
                     />
+
+                    <div className="flex items-center gap-2 mb-6 mt-2 select-none">
+                        <input
+                            type="checkbox"
+                            id="keepLoggedIn"
+                            checked={keepLoggedIn}
+                            onChange={(e) => setKeepLoggedIn(e.target.checked)}
+                            className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-purple-600 focus:ring-purple-500/50 cursor-pointer"
+                        />
+                        <label htmlFor="keepLoggedIn" className="text-xs text-slate-300 cursor-pointer">
+                            Keep me logged in
+                        </label>
+                    </div>
 
                     {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
 

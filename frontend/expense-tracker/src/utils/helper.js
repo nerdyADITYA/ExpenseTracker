@@ -1,9 +1,39 @@
 import moment from "moment"
 
+import { BASE_URL } from "./apiPaths";
+
 export const validateEmail = (email) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
 }
+
+export const getProfileImageUrl = (url) => {
+    if (!url) return "";
+    
+    // If it is a blob URL (from file input preview), return it directly
+    if (typeof url === "string" && url.startsWith("blob:")) {
+        return url;
+    }
+    
+    // If it's a full URL, use the browser's URL constructor to safely parse and reconstruct it
+    if (typeof url === "string" && url.includes("http")) {
+        try {
+            const parsedUrl = new URL(url);
+            const pathnameParts = parsedUrl.pathname.split("/");
+            const filename = pathnameParts.pop();
+            // Decode first to prevent double encoding if the database URL was already partially encoded
+            const decodedFilename = decodeURIComponent(filename);
+            parsedUrl.pathname = [...pathnameParts, encodeURIComponent(decodedFilename)].join("/");
+            return parsedUrl.toString();
+        } catch (e) {
+            console.error("Invalid URL in getProfileImageUrl:", url);
+            return url;
+        }
+    }
+    
+    // Otherwise, it's a relative filename/path, so we prepend BASE_URL/uploads
+    return `${BASE_URL}/uploads/${encodeURIComponent(url)}`;
+};
 
 export const getInitials = (name) => {
     if(!name) return "";

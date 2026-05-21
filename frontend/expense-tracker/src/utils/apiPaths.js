@@ -34,5 +34,10 @@ export const API_PATHS = {
         SYNC: "/api/v1/gmail/sync",
         APPROVE: (id) => `/api/v1/gmail/approve/${id}`,
         DELETE: (id) => `/api/v1/gmail/pending/${id}`
+    },
+    BANK_ACCOUNTS: {
+        ADD_ACCOUNT: "/api/v1/bank-accounts/add",
+        GET_ACCOUNTS: "/api/v1/bank-accounts/get",
+        DELETE_ACCOUNT: (accountId) => `/api/v1/bank-accounts/${accountId}`,
     }
 }

@@ -31,11 +31,13 @@ const runMigrations = async (queryInterface) => {
     await sequelize.query("ALTER TABLE Expenses ADD COLUMN IF NOT EXISTS entrySource VARCHAR(50) DEFAULT 'manual';");
     await sequelize.query("ALTER TABLE Expenses ADD COLUMN IF NOT EXISTS emailId VARCHAR(255) DEFAULT NULL;");
     await sequelize.query("ALTER TABLE Expenses ADD COLUMN IF NOT EXISTS rawText TEXT DEFAULT NULL;");
+    await sequelize.query("ALTER TABLE Expenses ADD COLUMN IF NOT EXISTS bankAccountId INT DEFAULT NULL;");
 
     // Incomes table new columns
     await sequelize.query("ALTER TABLE Incomes ADD COLUMN IF NOT EXISTS entrySource VARCHAR(50) DEFAULT 'manual';");
     await sequelize.query("ALTER TABLE Incomes ADD COLUMN IF NOT EXISTS emailId VARCHAR(255) DEFAULT NULL;");
     await sequelize.query("ALTER TABLE Incomes ADD COLUMN IF NOT EXISTS rawText TEXT DEFAULT NULL;");
+    await sequelize.query("ALTER TABLE Incomes ADD COLUMN IF NOT EXISTS bankAccountId INT DEFAULT NULL;");
 
     console.log("Schema migrations completed successfully.");
   } catch (migrationError) {
@@ -59,4 +61,12 @@ const connectDB = async () => {
   }
 };
 
-module.exports = { sequelize, connectDB };
+// Export to resolve circular references before preloading models
+module.exports = { sequelize, connectDB };
+
+// Preload models so they are registered with Sequelize prior to sync
+require("../models/User");
+require("../models/Expense");
+require("../models/Income");
+require("../models/PendingTransaction");
+require("../models/BankAccount");

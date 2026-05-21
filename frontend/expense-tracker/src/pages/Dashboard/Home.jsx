@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/layouts/DashboardLayout'
 import { useUserAuth } from '../../hooks/useUserAuth'
@@ -17,12 +17,14 @@ import RecentIncome from '../../components/Dashboard/RecentIncome'
 import toast from 'react-hot-toast'
 import GmailConnectCard from '../../components/Dashboard/GmailConnectCard'
 import AutoDetectedTransactions from '../../components/Dashboard/AutoDetectedTransactions'
+import { UserContext } from '../../context/UserContext'
 
 const Home = () => {
 
     useUserAuth()
 
     const navigate = useNavigate()
+    const { activeBankAccount } = useContext(UserContext)
 
     const[dashboardData,setDashboardData] = useState(null)
     const[loading,setLoading] = useState(false)
@@ -76,12 +78,12 @@ const Home = () => {
             window.history.replaceState({}, document.title, window.location.pathname)
         }
     return () => {}
-    }, [])
+    }, [activeBankAccount?.id])
     
 
     return (
     <DashboardLayout activeMenu = "Dashboard">
-        <div className="my-5 mx-auto">
+        <div className="my-5 w-full mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <InfoCard 
                 icon={<IoMdCard/>}
