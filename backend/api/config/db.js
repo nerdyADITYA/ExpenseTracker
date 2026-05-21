@@ -39,6 +39,11 @@ const runMigrations = async (queryInterface) => {
     await sequelize.query("ALTER TABLE Incomes ADD COLUMN IF NOT EXISTS rawText TEXT DEFAULT NULL;");
     await sequelize.query("ALTER TABLE Incomes ADD COLUMN IF NOT EXISTS bankAccountId INT DEFAULT NULL;");
 
+    // PendingTransactions table new columns
+    await sequelize.query("ALTER TABLE PendingTransactions ADD COLUMN IF NOT EXISTS bankAccountId INT DEFAULT NULL;");
+    await sequelize.query("ALTER TABLE PendingTransactions ADD COLUMN IF NOT EXISTS detectedBankName VARCHAR(255) DEFAULT NULL;");
+    await sequelize.query("ALTER TABLE PendingTransactions ADD COLUMN IF NOT EXISTS detectedAccountNumber VARCHAR(255) DEFAULT NULL;");
+
     // Backfill bankAccountId for existing expenses/incomes that are NULL
     try {
       await sequelize.query(`

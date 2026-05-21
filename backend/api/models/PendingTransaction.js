@@ -41,6 +41,18 @@ const PendingTransaction = sequelize.define("PendingTransaction", {
     type: DataTypes.ENUM("pending", "approved", "deleted"),
     defaultValue: "pending",
   },
+  bankAccountId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  detectedBankName: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  detectedAccountNumber: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
   timestamps: true,
 });

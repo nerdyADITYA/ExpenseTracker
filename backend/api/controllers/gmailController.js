@@ -140,10 +140,24 @@ exports.getGmailStatus = async (req, res) => {
  */
 exports.getPendingTransactions = async (req, res) => {
   const userId = req.user.id;
+  const activeBankAccountId = req.headers["x-bank-account-id"];
 
   try {
+    const { Op } = require("sequelize");
+    const whereClause = {
+      userId,
+      status: "pending",
+    };
+
+    if (activeBankAccountId) {
+      whereClause[Op.or] = [
+        { bankAccountId: activeBankAccountId },
+        { bankAccountId: null }
+      ];
+    }
+
     const transactions = await PendingTransaction.findAll({
-      where: { userId, status: "pending" },
+      where: whereClause,
       order: [["date", "DESC"]],
     });
     res.json(transactions);
@@ -189,7 +203,9 @@ exports.approveTransaction = async (req, res) => {
       return res.status(404).json({ message: "Pending transaction not found" });
     }
 
-    if (!bankAccountId) {
+    const targetBankAccountId = pendingTx.bankAccountId || bankAccountId;
+
+    if (!targetBankAccountId) {
       return res.status(400).json({ message: "Bank account selection is required !!!" });
     }
 
@@ -209,7 +225,7 @@ exports.approveTransaction = async (req, res) => {
         entrySource: "email",
         emailId: pendingTx.emailId,
         rawText: pendingTx.rawText,
-        bankAccountId,
+        bankAccountId: targetBankAccountId,
       });
     } else {
       await Income.create({
@@ -221,7 +237,7 @@ exports.approveTransaction = async (req, res) => {
         entrySource: "email",
         emailId: pendingTx.emailId,
         rawText: pendingTx.rawText,
-        bankAccountId,
+        bankAccountId: targetBankAccountId,
       });
     }
 

@@ -18,7 +18,7 @@ import toast from 'react-hot-toast'
 import Modal from '../Modal'
 import Input from '../Inputs/Input'
 
-const AutoDetectedTransactions = ({ onRefresh }) => {
+const AutoDetectedTransactions = ({ activeBankAccountId, onRefresh }) => {
     const [transactions, setTransactions] = useState([])
     const [loading, setLoading] = useState(false)
     const [syncing, setSyncing] = useState(false)
@@ -138,7 +138,7 @@ const AutoDetectedTransactions = ({ onRefresh }) => {
 
     useEffect(() => {
         fetchPendingTransactions()
-    }, [])
+    }, [activeBankAccountId])
 
     if (!loading && transactions.length === 0) {
         return (
@@ -199,6 +199,20 @@ const AutoDetectedTransactions = ({ onRefresh }) => {
                                         </span>
                                     </div>
                                     <span className="text-xs text-slate-400 block mt-0.5">{moment(tx.date).format("Do MMM YYYY, h:mm a")}</span>
+                                    {tx.detectedBankName && (
+                                        <div className="flex items-center gap-1.5 mt-1.5">
+                                            <span className="text-[10px] font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700/50">
+                                                {tx.detectedBankName.toUpperCase()} {tx.detectedAccountNumber ? `XX${tx.detectedAccountNumber}` : ''}
+                                            </span>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                                tx.bankAccountId 
+                                                    ? 'bg-purple-950/40 text-purple-400 border border-purple-900/30' 
+                                                    : 'bg-yellow-950/40 text-yellow-400 border border-yellow-900/30'
+                                            }`}>
+                                                {tx.bankAccountId ? 'Auto-Matched' : 'Unmatched'}
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

@@ -133,6 +133,41 @@ const parseGeneric = (text) => {
 };
 
 /**
+ * Detect the account or card number from the email body text.
+ * @param {string} text 
+ * @returns {string|null}
+ */
+const detectAccountNumber = (text) => {
+  if (!text) return null;
+
+  // Patterns to look for 4-digit card or account numbers:
+  // e.g. "A/c XX1234", "a/c ending in 1234", "A/c no. XXXXXX1234", "ending in 1234", "Account 1234", "card 1234", etc.
+  const patterns = [
+    /a\/c\s*(?:no\.?|number)?\s*[*xX]*\s*(\d{4})\b/i,
+    /acct\s*(?:no\.?|number)?\s*[*xX]*\s*(\d{4})\b/i,
+    /account\s*(?:no\.?|number)?\s*[*xX]*\s*(\d{4})\b/i,
+    /card\s*(?:no\.?|number)?\s*[*xX]*\s*(\d{4})\b/i,
+    /(?:ending|ending in|ending with)\s*(?:in|xx)?\s*(\d{4})\b/i,
+    /\b(?:xx|xx*)\s*(\d{4})\b/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  // Fallback check for any 4 digits prefixed by x/X/* or inside standard format
+  const fallbackMatch = text.match(/[*xX]+(\d{4})\b/);
+  if (fallbackMatch && fallbackMatch[1]) {
+    return fallbackMatch[1];
+  }
+
+  return null;
+};
+
+/**
  * Main email parser entry point.
  * @param {string} rawText 
  * @returns {object|null}
@@ -146,15 +181,33 @@ const parseEmail = (rawText) => {
   // Call the appropriate parser based on keywords in the body
   if (/icici/i.test(text)) {
     parsed = parseICICI(text);
+    if (parsed) parsed.detectedBankName = "ICICI";
   } else if (/hdfc/i.test(text)) {
     parsed = parseHDFC(text);
-  } else if (/sbi/i.test(text)) {
+    if (parsed) parsed.detectedBankName = "HDFC";
+  } else if (/sbi/i.test(text) || /state bank of india/i.test(text)) {
     parsed = parseSBI(text);
+    if (parsed) parsed.detectedBankName = "SBI";
   }
 
   // Fallback to generic parsing if bank-specific logic failed or didn't run
   if (!parsed) {
     parsed = parseGeneric(text);
+    if (parsed) {
+      if (/icici/i.test(text)) {
+        parsed.detectedBankName = "ICICI";
+      } else if (/hdfc/i.test(text)) {
+        parsed.detectedBankName = "HDFC";
+      } else if (/sbi/i.test(text) || /state bank of india/i.test(text)) {
+        parsed.detectedBankName = "SBI";
+      } else {
+        parsed.detectedBankName = null;
+      }
+    }
+  }
+
+  if (parsed) {
+    parsed.detectedAccountNumber = detectAccountNumber(text);
   }
 
   return parsed;

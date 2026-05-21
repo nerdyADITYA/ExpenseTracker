@@ -4,6 +4,23 @@ const { parseEmail } = require("../utils/emailParser");
 const PendingTransaction = require("../models/PendingTransaction");
 const Expense = require("../models/Expense");
 const Income = require("../models/Income");
+const BankAccount = require("../models/BankAccount");
+
+const matchBank = (userBankName, detectedBankName) => {
+  if (!userBankName || !detectedBankName) return false;
+  let u = userBankName.toLowerCase().trim();
+  let d = detectedBankName.toLowerCase().trim();
+
+  // Normalize SBI/State Bank of India
+  if (u.includes("sbi") || u.includes("state bank of india")) {
+    u = "sbi";
+  }
+  if (d.includes("sbi") || d.includes("state bank of india")) {
+    d = "sbi";
+  }
+
+  return u.includes(d) || d.includes(u);
+};
 
 // Initialize Google OAuth2 Client
 const getOAuth2Client = () => {
@@ -153,6 +170,9 @@ const syncEmails = async (user) => {
     const authClient = await getFreshClient(user);
     const gmail = google.gmail({ version: "v1", auth: authClient });
 
+    // Fetch user bank accounts for resolution
+    const userAccounts = await BankAccount.findAll({ where: { userId: user.id } });
+
     // Filter recent 2 days bank messages (saves time/bandwidth, covers hourly syncs)
     const query = "subject:(debited OR credited OR transaction OR payment OR alert OR transfer OR txn OR update) newer_than:2d";
     
@@ -206,6 +226,35 @@ const syncEmails = async (user) => {
       const parsedTx = parseEmail(bodyText);
       if (!parsedTx) continue;
 
+      // Resolve bank account mapping
+      let bankAccountId = null;
+      const detectedBankName = parsedTx.detectedBankName;
+      const detectedAccountNumber = parsedTx.detectedAccountNumber;
+
+      if (detectedBankName) {
+        // Find user accounts of this bank
+        const matchingBankAccounts = userAccounts.filter(acc => 
+          matchBank(acc.bankName, detectedBankName)
+        );
+
+        if (matchingBankAccounts.length > 0) {
+          // Double validation: bank name + account number (last 4 digits matching)
+          if (detectedAccountNumber) {
+            const doubleMatched = matchingBankAccounts.find(acc => 
+              acc.accountNumber && acc.accountNumber.trim().endsWith(detectedAccountNumber)
+            );
+            if (doubleMatched) {
+              bankAccountId = doubleMatched.id;
+            }
+          }
+
+          // Fallback check: if double validation didn't match, and there's exactly one user bank account registered for this bank
+          if (!bankAccountId && matchingBankAccounts.length === 1) {
+            bankAccountId = matchingBankAccounts[0].id;
+          }
+        }
+      }
+
       // Determine date from message header
       let dateVal = new Date();
       const headers = msgData.payload.headers || [];
@@ -224,6 +273,9 @@ const syncEmails = async (user) => {
         emailId: emailId,
         rawText: bodyText,
         status: "pending",
+        bankAccountId,
+        detectedBankName,
+        detectedAccountNumber,
       });
 
       importedCount++;
